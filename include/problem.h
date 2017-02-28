@@ -35,7 +35,13 @@
  * In future it should be written better.
  */
 
+#ifndef _PROBLEM_H_
+#define _PROBLEM_H_
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 #define PROBLEM_WRITE_FORMAT "%lf"
 #define PROBLEM_READ_FORMAT "%lf\n"
@@ -54,14 +60,15 @@ typedef struct Problem {
   // double *dy;
   // double *ddy; // I think it is clear the game here...
 
-  char* y_buf; /**< output buffer for y */
+  char* y_buf;       /**< output buffer for y */
+  size_t y_buf_size; /**< output Problem#y_buf buffer size */
 
   size_t xSize; /**< input placeholder size, it will be used in reading */
   size_t ySize; /**< output placeholder size, it will be used for writing */
   size_t pSize; /**< parameters placeholder size, it will be used for reading
                    parameters */
 
-  int (*f)(Problem *); /**< callback for evaluating the function */
+  int (*f)(struct Problem *); /**< callback for evaluating the function */
   // int (*df)(Problem *);
   // int (*ddf)(Problem *); // ... and also here...
 } Problem;
@@ -86,6 +93,20 @@ Problem *Problem_init(size_t xSize, size_t ySize, size_t pSize);
  * @return It returns nothing
  */
 void Problem_destroy(Problem *self);
+
+/**
+ * @brief private function for updating. Do NOT use it
+ *
+ * Calls internal function for updating all the values. This function is
+ * called when a user perform a writing in the input file.
+ * @param self the Problem to be updated
+ * @param input the input string from the filesystem
+ * @param v vector to update
+ * @param size size of the vector. it must be consistent
+ * @return Return zero on suceed
+ */
+int Problem_write__private(Problem *self, const char *input, double *v,
+                           size_t size);
 /**
  * @brief updates values calling the internal function
  *
@@ -111,19 +132,6 @@ inline int Problem_write_p(Problem *self, const char *input) {
   return Problem_write__private(self, input, self->p, self->pSize);
 }
 /**
- * @brief private function for updating. Do NOT use it
- *
- * Calls internal function for updating all the values. This function is
- * called when a user perform a writing in the input file.
- * @param self the Problem to be updated
- * @param input the input string from the filesystem
- * @param v vector to update
- * @param size size of the vector. it must be consistent
- * @return Return zero on suceed
- */
-int Problem_write__private(Problem *self, const char *input, double *v,
-                           size_t size);
-/**
  * @brief return the current representation of the data to be written, with
  * offset
  *
@@ -138,6 +146,17 @@ int Problem_write__private(Problem *self, const char *input, double *v,
  * @param buf the ouput vector of char representation
  * @param size the number of byte to write in buf
  * @param offset the offset for starting the writing
- * @parma return byte written to buf
+ * @param return byte written to buf
+ * @return written size
  */
-int Problem_read(Problem *self, char *buf, char *size, char *offset);
+int Problem_read(Problem *self, char *buf, size_t size, size_t offset);
+/**
+ * @brief Create a string representation for the data
+ *
+ * This functions writes only the string representation into the
+ * problem struct thus we already know the length of the evaluated string
+ * @param self Problem current instance
+ * @return buffer size that is saved in Problem#y_buf_size
+ */
+ int Problem_read_buf(Problem *self);
+#endif /* _PROBLEM_H_ */

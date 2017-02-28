@@ -26,43 +26,43 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "problem.h"
-#include <string.h>
 
-Problem *Problem_init(size_t xSize, size_t ySize, size_t pSize) {
+Problem* Problem_init(size_t xSize, size_t ySize, size_t pSize) {
   Problem *self = (Problem *)malloc(sizeof(Problem));
-  if (!ret)
+  if (!self)
     return NULL;
   self->xSize = xSize;
   self->ySize = ySize;
   self->pSize = pSize;
+  self->y_buf_size = 0;
 
-  self->x = (double *)calloc(sizeof(double) * self->xSize);
+  self->x = (double *)calloc(self->xSize, sizeof(double));
   if (!self->x) {
-    testProblem_destroy(self);
+    Problem_destroy(self);
     return NULL;
   }
 
-  self->y = (double *)calloc(sizeof(double) * self->ySize);
+  self->y = (double *)calloc(self->ySize, sizeof(double));
   if (!self->y) {
-    testProblem_destroy(self);
+    Problem_destroy(self);
     return NULL;
   }
 
-  self->p = (double *)calloc(sizeof(double) * self->pSize);
+  self->p = (double *)calloc(self->xSize, sizeof(double));
   if (!self->p) {
-    testProblem_destroy(self);
+    Problem_destroy(self);
     return NULL;
   }
 
-  return ret;
+  return self;
 }
 
-void testProblem_destroy(testProblem *self) {
+void Problem_destroy(Problem *self) {
   if (self->x)
     free(self->x);
   if (self->y)
     free(self->y);
-    if(self->y_buf) free(self-y->buf);
+    if(self->y_buf) free(self->y_buf);
   if (self->p)
     free(self->p);
   free(self);
@@ -73,12 +73,12 @@ int Problem_write__private(Problem *self, const char *input, double *v,
   size_t idx;
   char *input_r = strdup(input);
   char *token;
-  char *saveptr;
+  char **saveptr;
 
   idx = 0;
   token = strtok_r(input_r, "\n", saveptr);
   while (token != NULL) {
-    if (sscanf(PROBLEM_WRITE_FORMAT, &(v[idx])) != 1) {
+    if (sscanf(token, PROBLEM_WRITE_FORMAT, &(v[idx])) != 1) {
       free(input_r);
       return 1;
     }
@@ -92,43 +92,60 @@ int Problem_write__private(Problem *self, const char *input, double *v,
     self->f(self);
   }
 
+  free(token);
+  free(saveptr);
   free(input_r);
   return 0;
 }
 
+// TODO Check better this I don't like it
 int Problem_read_buf(Problem *self) {
   char *token;
   char *output;
-  size_t output_size int idx;
+  size_t output_size;
+  int idx;
 
   output_size = 0;
 
   for (size_t idx; idx < self->ySize; idx++) {
     sprintf(token, PROBLEM_READ_FORMAT, self->y[idx]);
-    output_size += strlen(token) realloc(output, output_size);
+    output_size += strlen(token);
+    if (!(realloc(output, output_size))) {
+      free(token);
+      free(output);
+      free(self->y_buf);
+      self->y_buf_size = 0;
+      return 0;
+    }
     strcat(output, token);
   }
   free(token);
 
   if (self->y_buf)
   free(self->y_buf);
-  
+
+  self->y_buf = (char*)calloc(output_size, sizeof(char));
+  if (!(self->y_buf)) {
+      self->y_buf_size = 0;
+  }
+  strncpy(self->y_buf, output, output_size);
+  self->y_buf_size = output_size;
+  free(output);
+  return output_size;
 }
 
-int Problem_read(Problem *self, char *buf, char *size, char *offset) {
-
-
-  // Copying inside buf
-  // size_t output_size = strlen(self->y_buf);
+int Problem_read(Problem *self, char *buf, size_t size, size_t offset) {
+  size_t output_size;
+  output_size = strlen(self->y_buf);
   if (offset > output_size)
     return 0;
 
-  if (offset + size > output_size) {
-    memcpy(buf, output + offset, output_size - offset);
+  if ((offset + size) > output_size) {
+    memcpy(buf, self->y_buf + offset, output_size - offset);
     return output_size - offset;
   }
 
-  memcpy(buf, output + offset, size);
+  memcpy(buf, (self->y_buf + offset), size);
   return size;
   // end copy
 }

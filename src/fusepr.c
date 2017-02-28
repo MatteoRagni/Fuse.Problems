@@ -25,35 +25,81 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <math.h>
-#include "problem.h"
 #include "fusepr.h"
 
-int rosenbrock_f(Problem *s) {
-  s->y[0] = pow(s->p[0] - s->x[0], 2.0) +
-            s->p[1] * pow((s->x[1] - pow(s->x[0], 2.0)), 2.0);
-  s->y[1] = pow(s->p[0] - s->x[1], 2.0) +
-            s->p[1] * pow((s->x[0] - pow(s->x[1], 2.0)), 2.0);
+static int FuseProblem_getattr(const char *path, struct stat *stbuf) {
+  memset(stbuf, 0, sizeof(struct stat));
+
+  if (strcmp(path, "/") == 0) {
+    stbuf->st_mode = S_IFDIR | S_IRUSR;
+    stbuf->st_nlink = 2;
+    return 0;
+  }
+
+  if (strcmp(path, FuseProblem_x_path) == 0) {
+    stbuf->st_mode = S_IFREG | S_IWUSR;
+    stbuf->st_nlink = 1;
+    stbuf->st_size = 0;
+    return 0;
+  }
+
+  if (strcmp(path, FuseProblem_y_path) == 0) {
+    stbuf->st_mode = S_IFREG | S_IRUSR;
+    stbuf->st_nlink = 1;
+    stbuf->st_size = GET_PROBLEM()->y_buf_size;
+    return 0;
+  }
+
+  if (strcmp(path, FuseProblem_p_path) == 0) {
+    stbuf->st_mode = S_IFREG | S_IWUSR;
+    stbuf->st_nlink = 1;
+    stbuf->st_size = 0;
+    return 0;
+  }
+
+  return -ENOENT;
+}
+
+static int FuseProblem_readdir(const char *path, void *buf,
+                               fuse_fill_dir_t filler, off_t offset,
+                               struct fuse_file_info *fi) {
+  if (strcmp(path, "/") != 0)
+    return 0;
+
+  filler(buf, ".", NULL, 0);
+  filler(buf, "..", NULL, 0);
+  filler(buf, FuseProblem_x_path, NULL, 0);
+  filler(buf, FuseProblem_y_path, NULL, 0);
+  filler(buf, FuseProblem_p_path, NULL, 0);
   return 0;
 }
 
-struct fuse_operations FuseProblem_operations = {
-  .getattr = FuseProblem_getattr,
-  .open = FuseProblem_open,
-  .read = FuseProblem_read,
-  .readdir = FuseProblem_readdir,
-  .write = FuseProblem_write
-};
+static int FuseProblem_open(const char *path, struct fuse_file_info *fi) {
+  return 0;
+}
 
-/*   __  __      _
- * |  \/  |__ _(_)_ _
- * | |\/| / _` | | ' \
- * |_|  |_\__,_|_|_||_|
- */
-int main(int argc, char *argv[]) {
+static int FuseProblem_write(const char *path, const char *buf, size_t size,
+                             off_t offset, struct fuse_file_info *fi) {
+  if (strcmp(path, FuseProblem_p_path) == 0) {
+    if (Problem_write_p(GET_PROBLEM(), buf) == 0)
+      return size;
+    else
+      return 0;
+  }
+  if (strcmp(path, FuseProblem_x_path) == 0) {
+    if (Problem_write_x(GET_PROBLEM(), buf) == 0)
+      return size;
+    else
+      return 0;
+  }
 
-  Problem * pr = Problem_init(2, 2, 2);
-  pr->f = rosenbrock_f;
+  return size;
+}
 
-  return fuse_main(argc, argv, &FuseProblem_operations, (void*)pr);
+static int FuseProblem_read(const char *path, char *buf, size_t size,
+                            off_t offset, struct fuse_file_info *fi) {
+  if (strcmp(path, FuseProblem_y_path) == 0) {
+    return Problem_read(GET_PROBLEM(), buf, size, offset);
+  }
+  return 0;
 }

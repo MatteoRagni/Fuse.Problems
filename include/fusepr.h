@@ -25,35 +25,35 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <math.h>
+#ifndef _FUSER_H_
+#define _FUSER_H_
+
+#define FUSE_USE_VERSION 26
+#define _XOPEN_SOURCE 500
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fuse.h>
+#include <string.h>
 #include "problem.h"
-#include "fusepr.h"
 
-int rosenbrock_f(Problem *s) {
-  s->y[0] = pow(s->p[0] - s->x[0], 2.0) +
-            s->p[1] * pow((s->x[1] - pow(s->x[0], 2.0)), 2.0);
-  s->y[1] = pow(s->p[0] - s->x[1], 2.0) +
-            s->p[1] * pow((s->x[0] - pow(s->x[1], 2.0)), 2.0);
-  return 0;
-}
+#define GET_PROBLEM() ((Problem *)(fuse_get_context()->private_data))
 
-struct fuse_operations FuseProblem_operations = {
-  .getattr = FuseProblem_getattr,
-  .open = FuseProblem_open,
-  .read = FuseProblem_read,
-  .readdir = FuseProblem_readdir,
-  .write = FuseProblem_write
-};
+// Fuse configuration
+static const char *FuseProblem_x_path = "/x";
+static const char *FuseProblem_y_path = "/y";
+static const char *FuseProblem_p_path = "/p";
 
-/*   __  __      _
- * |  \/  |__ _(_)_ _
- * | |\/| / _` | | ' \
- * |_|  |_\__,_|_|_||_|
- */
-int main(int argc, char *argv[]) {
+static int FuseProblem_getattr(const char *path, struct stat *stbuf);
+static int FuseProblem_readdir(const char *path, void *buf,
+                               fuse_fill_dir_t filler, off_t offset,
+                               struct fuse_file_info *fi);
+static int FuseProblem_open(const char *path, struct fuse_file_info *fi);
+static int FuseProblem_read(const char *path, char *buf, size_t size,
+                            off_t offset, struct fuse_file_info *fi);
+static int FuseProblem_write(const char *path, const char *buf, size_t size,
+                             off_t offset, struct fuse_file_info *fi);
 
-  Problem * pr = Problem_init(2, 2, 2);
-  pr->f = rosenbrock_f;
-
-  return fuse_main(argc, argv, &FuseProblem_operations, (void*)pr);
-}
+#endif /* _FUSER_H_ */
