@@ -26,8 +26,15 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <math.h>
-#include "problem.h"
 #include "fusepr.h"
+
+struct fuse_operations FuseProblem_operations = {
+ .getattr = FuseProblem_getattr,
+ .open = FuseProblem_open,
+ .read = FuseProblem_read,
+ .readdir = FuseProblem_readdir,
+ .write = FuseProblem_write
+};
 
 int rosenbrock_f(Problem *s) {
   s->y[0] = pow(s->p[0] - s->x[0], 2.0) +
@@ -36,14 +43,6 @@ int rosenbrock_f(Problem *s) {
             s->p[1] * pow((s->x[0] - pow(s->x[1], 2.0)), 2.0);
   return 0;
 }
-
-struct fuse_operations FuseProblem_operations = {
-  .getattr = FuseProblem_getattr,
-  .open = FuseProblem_open,
-  .read = FuseProblem_read,
-  .readdir = FuseProblem_readdir,
-  .write = FuseProblem_write
-};
 
 /*   __  __      _
  * |  \/  |__ _(_)_ _

@@ -116,9 +116,7 @@ int Problem_write__private(Problem *self, const char *input, double *v,
  * @param input the input string from the filesystem
  * @return Return zero on suceed
  */
-inline int Problem_write_x(Problem *self, const char *input) {
-  return Problem_write__private(self, input, self->x, self->xSize);
-}
+int Problem_write_x(Problem *self, const char *input);
 /**
  * @brief updates parameters and calls internal function
  *
@@ -128,9 +126,7 @@ inline int Problem_write_x(Problem *self, const char *input) {
  * @param input the input string from the filesystem
  * @return Return zero on suceed
  */
-inline int Problem_write_p(Problem *self, const char *input) {
-  return Problem_write__private(self, input, self->p, self->pSize);
-}
+int Problem_write_p(Problem *self, const char *input);
 /**
  * @brief return the current representation of the data to be written, with
  * offset

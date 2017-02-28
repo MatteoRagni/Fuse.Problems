@@ -149,3 +149,11 @@ int Problem_read(Problem *self, char *buf, size_t size, size_t offset) {
   return size;
   // end copy
 }
+
+int Problem_write_x(Problem *self, const char *input) {
+  return Problem_write__private(self, input, self->x, self->xSize);
+}
+
+int Problem_write_p(Problem *self, const char *input) {
+  return Problem_write__private(self, input, self->p, self->pSize);
+}

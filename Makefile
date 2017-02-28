@@ -29,12 +29,14 @@ GCC     = gcc
 SRC     = main.c src/fusepr.c src/problem.c
 OBJ     = fusepr.o problem.o
 CFLAGS  = -I./include `pkg-config --cflags fuse`
-LDFLAGS = `pkg-config --libs fuse`
+LDFLAGS = `pkg-config --libs fuse` -lm
 
 all:
 	$(GCC) $(CFLAGS) -c src/problem.c $(LDFLAGS) -o problem.o
 	$(GCC) $(CFLAGS) -c src/fusepr.c $(LDFLAGS) -o fusepr.o
-	$(GCC) $(CFLAGS) main.c fusepr.o problem.o $(LDFLAGS) -o fuse_problem
+	$(GCC) $(CFLAGS) $(OBJ) main.c $(LDFLAGS) -o fuse_problem
 
 clean:
-	rm -f fuse_problem
+	rm -f fuse_problem *.o
+
+# gcc -I./include $(pkg-config --cflags fuse) src/problem.c src/fusepr.c main.c -lm $(pkg-config --libs fuse) -o fuse_problem
