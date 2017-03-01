@@ -1,2 +1,3 @@
 *.o
 fuse_problem
+.fuse_hidden*

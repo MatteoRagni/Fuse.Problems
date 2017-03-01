@@ -28,15 +28,20 @@
 #ifndef _FUSEPR_H_
 #define _FUSEPR_H_
 
-#define FUSE_USE_VERSION 26
+#define FUSE_USE_VERSION 30
 #define _XOPEN_SOURCE 500
 
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fuse.h>
 #include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <fcntl.h>
+
 #include "problem.h"
 
 #define GET_PROBLEM() ((Problem *)(fuse_get_context()->private_data))
@@ -56,6 +61,5 @@ int FuseProblem_read(const char *path, char *buf, size_t size,
 int FuseProblem_write(const char *path, const char *buf, size_t size,
                              off_t offset, struct fuse_file_info *fi);
 
-extern struct fuse_operations FuseProblem_operations;
 
 #endif /* _FUSEPR_H_ */

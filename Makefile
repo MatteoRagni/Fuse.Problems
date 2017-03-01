@@ -25,13 +25,14 @@
 # *                                                                           *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-GCC     = gcc
+GCC     = gcc -g
 SRC     = main.c src/fusepr.c src/problem.c
-OBJ     = fusepr.o problem.o
+OBJ     = fusepr.o problem.o utils.o
 CFLAGS  = -I./include `pkg-config --cflags fuse`
 LDFLAGS = `pkg-config --libs fuse` -lm
 
 all:
+	$(GCC) $(CFLAGS) -c src/utils.c $(LDFLAGS) -o utils.o
 	$(GCC) $(CFLAGS) -c src/problem.c $(LDFLAGS) -o problem.o
 	$(GCC) $(CFLAGS) -c src/fusepr.c $(LDFLAGS) -o fusepr.o
 	$(GCC) $(CFLAGS) $(OBJ) main.c $(LDFLAGS) -o fuse_problem

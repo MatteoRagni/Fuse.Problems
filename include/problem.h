@@ -43,8 +43,7 @@
 #include <math.h>
 #include <string.h>
 
-#define PROBLEM_WRITE_FORMAT "%lf"
-#define PROBLEM_READ_FORMAT "%lf\n"
+#include "utils.h"
 
 /**
  * @brief Problem container.
@@ -154,5 +153,5 @@ int Problem_read(Problem *self, char *buf, size_t size, size_t offset);
  * @param self Problem current instance
  * @return buffer size that is saved in Problem#y_buf_size
  */
- int Problem_read_buf(Problem *self);
+ int Problem_update(Problem *self);
 #endif /* _PROBLEM_H_ */

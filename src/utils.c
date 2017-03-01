@@ -25,37 +25,71 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <math.h>
-#include "fusepr.h"
+#include "utils.h"
 
-struct fuse_operations FuseProblem_operations = {
- .getattr = FuseProblem_getattr,
- .open = FuseProblem_open,
- .read = FuseProblem_read,
- .readdir = FuseProblem_readdir,
- .write = FuseProblem_write
-};
+size_t ProblemUtil_generator(char *buf, const double *v, size_t v_size) {
+  char token[PROBLEM_UTIL_MAX_STRING_ALLOC];
+  size_t ret;
+  size_t idx;
 
-int rosenbrock_f(Problem *s) {
-  s->y[0] = pow(s->p[0] - s->x[0], 2.0) +
-            s->p[1] * pow((s->x[1] - pow(s->x[0], 2.0)), 2.0);
-  s->y[1] = pow(s->p[0] - s->x[1], 2.0) +
-            s->p[1] * pow((s->x[0] - pow(s->x[1], 2.0)), 2.0);
-  return 0;
-}
+  ret = 1;
 
-/*   __  __      _
- * |  \/  |__ _(_)_ _
- * | |\/| / _` | | ' \
- * |_|  |_\__,_|_|_||_|
- */
-int main(int argc, char *argv[]) {
+  // Wrinting and concatenation of string with specified format
+  for (idx = 0; idx < v_size; idx++) {
+    snprintf(token, PROBLEM_UTIL_MAX_STRING_ALLOC,
+             PROBLEM_UTIL_GENERATOR_FORMAT, v[idx]);
+    ret += strlen(token);
+    buf = (char *)realloc((void *)buf, ret);
+    buf = strncat(buf, token, ret);
+  }
 
-  Problem * pr = Problem_init(2, 2, 2);
-  pr->f = rosenbrock_f;
-
-  int ret = fuse_main(argc, argv, &FuseProblem_operations, (void*)pr);
-
-  Problem_destroy(pr);
   return ret;
 }
+
+
+size_t ProblemUtil_parser(const char *buf, double *v, size_t v_size) {
+  size_t idx;
+  char * input_copy;
+  char * token;
+  double read;
+
+  idx = 0;
+  input_copy = strdup(buf);
+
+  while ((token = strsep(&input_copy, PROBLEM_UTIL_INPUT_SEPARATOR)) != NULL) {
+    if (sscanf(token, PROBLEM_UTIL_PARSER_FORMAT, &read) != 1) {
+      return idx;
+    }
+    v[idx] = read;
+    if (++idx >= v_size)
+      break;
+  }
+
+  return idx;
+}
+
+
+/*
+#include <stdio.h>
+int main() {
+  double x[] = {1.0, 2.0, 3.0, 4.0};
+  double y[] = {0, 0, 0, 0};
+  size_t size = 4;
+  size_t ret = 0;
+  char *buf = NULL;
+  buf = (char *)malloc(sizeof(char));
+
+  ret = ProblemUtil_generator(buf, x, size);
+  printf("%s", buf);
+
+  printf("Length = %d\nReading\n", ret);
+
+  ret = ProblemUtil_parser(buf, y, 4);
+
+  printf("%f\n%f\n%f\n%f\n", y[0], y[1], y[2], y[3]);
+
+  free(buf);
+
+  return 0;
+}
+*/
