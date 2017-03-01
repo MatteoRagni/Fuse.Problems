@@ -25,6 +25,7 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <stdio.h>
 #include <math.h>
 #include "fusepr.h"
 
@@ -33,7 +34,11 @@ struct fuse_operations FuseProblem_operations = {
  .open = FuseProblem_open,
  .read = FuseProblem_read,
  .readdir = FuseProblem_readdir,
- .write = FuseProblem_write
+ .write = FuseProblem_write,
+ .truncate = FuseProblem_truncate,
+ .getxattr = FuseProblem_getxattr,
+ .setxattr = FuseProblem_setxattr,
+ .access = FuseProblem_access
 };
 
 int rosenbrock_f(Problem *s) {
@@ -56,6 +61,20 @@ int main(int argc, char *argv[]) {
 
   int ret = fuse_main(argc, argv, &FuseProblem_operations, (void*)pr);
 
+  //char x_test[] = "2.0E00\n2.1E00";
+  //char p_test[] = "1.0E00\n1.0E02\n";
+
+  //Problem_write_x(pr, x_test);
+  //Problem_write_p(pr, p_test);
+
+  //printf("%s\n", pr->y_buf);
+  //printf("%d\n", pr->y_buf_size);
+
+  //printf("x = %lf, %lf\n", pr->x[0], pr->x[1]);
+  //printf("y = %lf, %lf\n", pr->y[0], pr->y[1]);
+  //printf("p = %lf, %lf\n", pr->p[0], pr->p[1]);
+
   Problem_destroy(pr);
-  return ret;
+  //return ret;
+  return 0;
 }

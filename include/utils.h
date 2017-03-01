@@ -27,9 +27,9 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 /**
  * @brief Maximum string alocation size
  *
@@ -53,7 +53,7 @@
  * @param v_size the double array size
  * @return the size of the array
  */
-size_t ProblemUtil_generator(char * buf, const double * v, size_t v_size);
+size_t ProblemUtil_generator(char **buf, const double *v, size_t v_size);
 
 /**
  * @brief parser for simple vector in files
@@ -66,6 +66,6 @@ size_t ProblemUtil_generator(char * buf, const double * v, size_t v_size);
  * @param v_size length of the vector to be saved
  * @return a value with number of elements update
  */
-size_t ProblemUtil_parser(const char * buf, double * v, size_t v_size);
+size_t ProblemUtil_parser(const char *buf, double *v, size_t v_size);
 
 #endif /* _UTILS_H_ */

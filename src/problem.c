@@ -120,7 +120,7 @@ int Problem_update(Problem *self) {
   // Evaluates the function
   self->f(self);
   // Update String Representation
-  self->y_buf_size = ProblemUtil_generator(self->y_buf, self->y, self->ySize);
+  self->y_buf_size = ProblemUtil_generator(&(self->y_buf), self->y, self->ySize);
   return self->y_buf_size;
 }
 
@@ -142,4 +142,25 @@ int Problem_read(Problem *self, char *buf, size_t size, size_t offset) {
   memcpy(buf, (self->y_buf + offset), size);
   return size;
   // end copy
+}
+
+//  ___      _
+// |   \ ___| |__ _  _ __ _
+// | |) / -_) '_ \ || / _` |
+// |___/\___|_.__/\_,_\__, |
+//                    |___/
+void Problem_debug(Problem * self) {
+  printf("=====> Problem Debug\n");
+  printf(" x = ");
+  for (size_t i = 0; i < self->xSize; i++)
+    printf("\t%0.3E", self->x[i]);
+  printf("\n p = ");
+  for (size_t i = 0; i < self->pSize; i++)
+    printf("\t%0.3E", self->p[i]);
+  printf("\n y = ");
+  for (size_t i = 0; i < self->ySize; i++)
+    printf("\t%0.3E", self->y[i]);
+  printf("\n buff size = %d", self->y_buf_size);
+  printf("\n\n%s", self->y_buf);
+  printf("=====> End Problem Debug\n");
 }

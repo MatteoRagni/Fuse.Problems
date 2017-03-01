@@ -28,21 +28,24 @@
 #ifndef _FUSEPR_H_
 #define _FUSEPR_H_
 
-#define FUSE_USE_VERSION 30
+#define FUSE_USE_VERSION 26
 #define _XOPEN_SOURCE 500
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
-#include <fuse.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
 #include <fcntl.h>
+#include <fuse.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "problem.h"
+
+#include <stdio.h>
+#define LOG(m) printf("====> FUSE_PROBLEM :: %s\n", m);
 
 #define GET_PROBLEM() ((Problem *)(fuse_get_context()->private_data))
 
@@ -51,15 +54,44 @@ static const char *FuseProblem_x_path = "/x";
 static const char *FuseProblem_y_path = "/y";
 static const char *FuseProblem_p_path = "/p";
 
+typedef enum FuseProblemPath {
+  ROOT_PATH,
+  X_PATH,
+  Y_PATH,
+  P_PATH
+} FuseProblemPath;
+
+static inline FuseProblemPath checkPath(const char *path) {
+  if (strcmp(path, "/") == 0) {
+    return ROOT_PATH;
+  }
+  if (strcmp(path, "/p") == 0) {
+    return P_PATH;
+  }
+  if (strcmp(path, "/x") == 0) {
+    return X_PATH;
+  }
+  if (strcmp(path, "/y") == 0) {
+    return Y_PATH;
+  }
+  return -1;
+}
+
 int FuseProblem_getattr(const char *path, struct stat *stbuf);
-int FuseProblem_readdir(const char *path, void *buf,
-                               fuse_fill_dir_t filler, off_t offset,
-                               struct fuse_file_info *fi);
+int FuseProblem_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+                        off_t offset, struct fuse_file_info *fi);
 int FuseProblem_open(const char *path, struct fuse_file_info *fi);
-int FuseProblem_read(const char *path, char *buf, size_t size,
-                            off_t offset, struct fuse_file_info *fi);
+int FuseProblem_read(const char *path, char *buf, size_t size, off_t offset,
+                     struct fuse_file_info *fi);
 int FuseProblem_write(const char *path, const char *buf, size_t size,
-                             off_t offset, struct fuse_file_info *fi);
+                      off_t offset, struct fuse_file_info *fi);
+int FuseProblem_truncate(const char *path, off_t size);
 
-
+int FuseProblem_flush(const char *path, struct fuse_file_info *fi);
+// int FuseProblem_access(const char* path, int mask);
+int FuseProblem_setxattr(const char *path, const char *name, const char *value,
+                         size_t size, int flags);
+int FuseProblem_getxattr(const char *path, const char *name, char *value,
+                         size_t size);
+int FuseProblem_listxattr(const char *path, const char *list, size_t size);
 #endif /* _FUSEPR_H_ */

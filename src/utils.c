@@ -27,8 +27,9 @@
 
 #include "utils.h"
 
-size_t ProblemUtil_generator(char *buf, const double *v, size_t v_size) {
+size_t ProblemUtil_generator(char **buf, const double *v, size_t v_size) {
   char token[PROBLEM_UTIL_MAX_STRING_ALLOC];
+  char* export;
   size_t ret;
   size_t idx;
 
@@ -39,10 +40,13 @@ size_t ProblemUtil_generator(char *buf, const double *v, size_t v_size) {
     snprintf(token, PROBLEM_UTIL_MAX_STRING_ALLOC,
              PROBLEM_UTIL_GENERATOR_FORMAT, v[idx]);
     ret += strlen(token);
-    buf = (char *)realloc((void *)buf, ret);
-    buf = strncat(buf, token, ret);
+    export = (char *)realloc((void *)export, ret);
+    export = strncat(export, token, ret);
   }
 
+  *buf = realloc(*buf, ret);
+  memcpy(*buf, export, ret * sizeof(char));
+  free(export);
   return ret;
 }
 
@@ -67,29 +71,3 @@ size_t ProblemUtil_parser(const char *buf, double *v, size_t v_size) {
 
   return idx;
 }
-
-
-/*
-#include <stdio.h>
-int main() {
-  double x[] = {1.0, 2.0, 3.0, 4.0};
-  double y[] = {0, 0, 0, 0};
-  size_t size = 4;
-  size_t ret = 0;
-  char *buf = NULL;
-  buf = (char *)malloc(sizeof(char));
-
-  ret = ProblemUtil_generator(buf, x, size);
-  printf("%s", buf);
-
-  printf("Length = %d\nReading\n", ret);
-
-  ret = ProblemUtil_parser(buf, y, 4);
-
-  printf("%f\n%f\n%f\n%f\n", y[0], y[1], y[2], y[3]);
-
-  free(buf);
-
-  return 0;
-}
-*/

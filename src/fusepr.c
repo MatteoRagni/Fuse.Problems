@@ -28,6 +28,8 @@
 #include "fusepr.h"
 
 int FuseProblem_getattr(const char *path, struct stat *stbuf) {
+  Problem_debug(GET_PROBLEM());
+
   memset(stbuf, 0, sizeof(struct stat));
 
   // User space configuration
@@ -35,25 +37,31 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
   stbuf->st_gid = getgid();
   stbuf->st_atime = stbuf->st_mtime = time(NULL);
 
-  if (strcmp(path, "/") == 0) {
-    stbuf->st_mode = S_IFDIR | 0440;
+  switch (checkPath(path)) {
+  case ROOT_PATH:
+    stbuf->st_mode = S_IFDIR | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 2;
-  } else if (strcmp(path, FuseProblem_x_path) == 0) {
-    stbuf->st_mode = S_IFREG | 0740;
+    break;
+  case X_PATH:
+    stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP;
     stbuf->st_nlink = 1;
     stbuf->st_size = 0;
-  } else if (strcmp(path, FuseProblem_y_path) == 0) {
-    stbuf->st_mode = S_IFREG | 0440;
+    break;
+  case Y_PATH:
+    stbuf->st_mode = S_IFREG | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
     stbuf->st_size = GET_PROBLEM()->y_buf_size;
-  } else if (strcmp(path, FuseProblem_p_path) == 0) {
-    stbuf->st_mode = S_IFREG | 0440;
+    break;
+  case P_PATH:
+    stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP;
     stbuf->st_nlink = 1;
     stbuf->st_size = 0;
-  } else {
-    stbuf->st_mode = S_IFREG | 0444;
-    stbuf->st_nlink = 1;
+    break;
+  default:
+    stbuf->st_mode = S_IFDIR | S_IRUSR | S_IRGRP;
+    stbuf->st_nlink = 2;
     stbuf->st_size = 0;
+    break;
   }
   return 0;
 }
@@ -63,23 +71,35 @@ int FuseProblem_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
   (void)offset;
   (void)fi;
 
-  if (strcmp(path, "/") != 0)
+  if (checkPath(path) < 0)
     return -ENOENT;
 
   filler(buf, ".", NULL, 0);
   filler(buf, "..", NULL, 0);
-  filler(buf, "x", NULL, 0);
-  filler(buf, "y", NULL, 0);
-  filler(buf, "p", NULL, 0);
+
+  switch (checkPath(path)) {
+  case ROOT_PATH:
+    filler(buf, "x", NULL, 0);
+    filler(buf, "y", NULL, 0);
+    filler(buf, "p", NULL, 0);
+    break;
+  case P_PATH:
+    filler(buf, "p", NULL, 0);
+    break;
+  case Y_PATH:
+    filler(buf, "y", NULL, 0);
+    break;
+  case X_PATH:
+    filler(buf, "x", NULL, 0);
+    break;
+  }
   return 0;
 }
 
 int FuseProblem_open(const char *path, struct fuse_file_info *fi) {
-  // if((fi->flags & 3) != O_RDONLY)
-  //  return -EACCES;
-  if (strcmp(path, FuseProblem_x_path) == 0 ||
-      strcmp(path, FuseProblem_p_path) == 0 ||
-      strcmp(path, FuseProblem_y_path) == 0)
+  fi->direct_io = 1;
+
+  if (checkPath(path) >= 0)
     return 0;
   return -ENOENT;
 }
@@ -87,16 +107,12 @@ int FuseProblem_open(const char *path, struct fuse_file_info *fi) {
 int FuseProblem_write(const char *path, const char *buf, size_t size,
                       off_t offset, struct fuse_file_info *fi) {
   if (strcmp(path, FuseProblem_p_path) == 0) {
-    if (Problem_write_p(GET_PROBLEM(), buf) == 0)
-      return size;
-    else
-      return 0;
+    Problem_write_p(GET_PROBLEM(), buf);
+    return size;
   }
   if (strcmp(path, FuseProblem_x_path) == 0) {
-    if (Problem_write_x(GET_PROBLEM(), buf) == 0)
-      return size;
-    else
-      return 0;
+    Problem_write_x(GET_PROBLEM(), buf);
+    return size;
   }
 
   return size;
@@ -108,4 +124,46 @@ int FuseProblem_read(const char *path, char *buf, size_t size, off_t offset,
     return Problem_read(GET_PROBLEM(), buf, size, offset);
   }
   return 0;
+}
+
+int FuseProblem_truncate(const char *path, off_t size) {
+  if (strcmp(path, FuseProblem_x_path) == 0 ||
+      strcmp(path, FuseProblem_p_path) == 0)
+    return 0;
+
+  return -ENOENT;
+}
+
+int FuseProblem_flush(const char *path, struct fuse_file_info *fi) { return 0; }
+
+int FuseProblem_access(const char *path, int mask) {
+//  switch (checkPath(path)) {
+//  case ROOT_PATH:
+//  case Y_PATH:
+//    if (mask & R_OK)
+//      return 0;
+//  case X_PATH:
+//  case P_PATH:
+//    if (mask & W_OK)
+//      return 0;
+//  //default:
+//  //  if (mask & R_OK)
+//  //    return 0;
+//  }
+//  return -EACCES;
+  return 0;
+}
+
+int FuseProblem_setxattr(const char *path, const char *name, const char *value,
+                         size_t size, int flags) {
+  return -ENOTSUP;
+}
+
+int FuseProblem_getxattr(const char *path, const char *name, char *value,
+                         size_t size) {
+  return -ENOTSUP;
+}
+
+int FuseProblem_listxattr(const char *path, const char *list, size_t size) {
+  return -ENOTSUP;
 }

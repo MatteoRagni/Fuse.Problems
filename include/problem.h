@@ -154,4 +154,6 @@ int Problem_read(Problem *self, char *buf, size_t size, size_t offset);
  * @return buffer size that is saved in Problem#y_buf_size
  */
  int Problem_update(Problem *self);
+
+ void Problem_debug(Problem * self);
 #endif /* _PROBLEM_H_ */
