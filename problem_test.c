@@ -6,7 +6,7 @@ int main() {
 
   CProblem pr;
 
-  pr = CProblem_new("testString");
+  pr = CProblem_new("test/libtest.so");
   printf("<Problem:%#010x>\n", pr);
 
   char xi[] = "1.0\n 2.0";

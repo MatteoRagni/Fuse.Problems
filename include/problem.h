@@ -44,7 +44,8 @@ using namespace std;
 #include <string>
 #include <vector>
 #include <sstream>
-#include <dlfnc.h
+#include <dlfcn.h>
+#include <unistd.h>
 
 typedef enum FunctionInput { xi, pi } FunctionInput;
 typedef enum FunctionOutput { info = -3, xo, po } FunctionOutput;
@@ -55,8 +56,7 @@ template <class FP> class Problem {
 
 private:
   string dl_file;
-  bool dl_open;
-
+  void* hdl;
   size_t x_s, p_s;
   string x_file, p_file, info_file;
   vector<string> y_file;
@@ -73,7 +73,7 @@ public:
   vector<FP> p;
 
   Problem(string dl)
-      : dl_file(dl), dl_open(false), x_file(""), p_file(""), info_file("") {
+      : dl_file(dl), x_file(""), p_file(""), info_file("") {
     init();
   };
   virtual ~Problem() { close(); };

@@ -31,7 +31,7 @@ SRC     = main.c src/fusepr.c src/problem.c
 OBJ     = fusepr.o problem.o utils.o
 CFLAGS  = -I./include
 LIBFUSE = `pkg-config fuse --cflags --libs`
-LDFLAGS = -lm
+LDFLAGS = -lm -ldl
 
 all: problem
 	$(GCC) $(CFLAGS) -c src/utils.c $(LDFLAGS) -o utils.o

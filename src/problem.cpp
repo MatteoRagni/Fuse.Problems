@@ -5,17 +5,32 @@
 #ifdef __cplusplus
 
 template <class FP> void Problem<FP>::init() {
-  x.resize(2, 0);
-  p.resize(2, 0);
+  size_t (*fncSize)();
+  Function *fncPtr;
 
-  x_s = 2;
-  p_s = 2;
+  if (!(access(dl_file.c_str(), F_OK) != -1))
+    throw("Cannot find library");
 
-  f.push_back(fA_test);
-  f.push_back(fB_test);
+  if (!(hdl = dlopen(dl_file.c_str(), RTLD_LAZY)))
+    throw(dlerror());
+
+  fncSize = (size_t(*)())dlsym(hdl, "FunctionSize");
+  fncPtr = (Function*)dlsym(hdl, "FunctionArray");
+
+  if (!fncSize)
+    throw("Cannot find FunctionSize symbol");
+
+  if (!fncPtr)
+    throw("Cannot find FunctionArray symbol");
+
+  for(size_t i = 0; i < fncSize(); i++)
+    f.push_back(fncPtr[i]);
 }
 
-template <class FP> void Problem<FP>::close() {}
+template <class FP> void Problem<FP>::close() {
+  if (hdl)
+    dlclose(hdl);
+}
 
 /*                _      _
  *  _  _ _ __  __| |__ _| |_ ___
@@ -29,7 +44,9 @@ template <class FP> void Problem<FP>::update() {
   for (auto i = f.begin(); i != f.end(); i++) {
     string s("");
     try {
-      (*i)(reinterpret_cast<void*>(this));
+      (*i)(reinterpret_cast<void*>(&y),
+           reinterpret_cast<void*>(&x),
+           reinterpret_cast<void*>(&p));
     } catch (...) {
       ERROR_LOG("Function throwed expression");
     }
