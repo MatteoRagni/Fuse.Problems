@@ -24,136 +24,89 @@
 /* OTHER DEALINGS IN THE SOFTWARE.                                           */
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#ifndef _FUSE_PROBLEM_PROBLEM_HH_
+#define _FUSE_PROBLEM_PROBLEM_HH_
 
-/**
- * @file problem.h
- * @author Matteo Ragni
- * @date 28 Feb 2017
- * @brief The container for the problem, selected through options
- *
- * This file implements a simple container for the problem.
- * In future it should be written better.
- */
+typedef void *CProblem;
 
-#ifndef _PROBLEM_H_
-#define _PROBLEM_H_
+#ifndef PROBLEM_PRECISION
+#define PROBLEM_PRECISION double
+#endif
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#ifdef __cplusplus
 
-#include "utils.h"
+using namespace std;
 
-/**
- * @brief Problem container.
- *
- * The problem container contains the last reading for the input values
- * Problem#x,
- * the last output values Problem#y and the parameters value Problem#p.
- */
-typedef struct Problem {
-  double *x; /**< Placeholder for x values */
-  double *p; /**< Placeholder for output values */
-  double *y; /**< Placeholder for parameters */
-  // double *dy;
-  // double *ddy; // I think it is clear the game here...
+#include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <regex>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <dlfnc.h
 
-  char* y_buf;       /**< output buffer for y */
-  size_t y_buf_size; /**< output Problem#y_buf buffer size */
+typedef enum FunctionInput { xi, pi } FunctionInput;
+typedef enum FunctionOutput { info = -3, xo, po } FunctionOutput;
 
-  size_t xSize; /**< input placeholder size, it will be used in reading */
-  size_t ySize; /**< output placeholder size, it will be used for writing */
-  size_t pSize; /**< parameters placeholder size, it will be used for reading
-                   parameters */
+typedef void (*Function)(void*,void*,void*);
 
-  int (*f)(struct Problem *); /**< callback for evaluating the function */
-  // int (*df)(Problem *);
-  // int (*ddf)(Problem *); // ... and also here...
-} Problem;
+template <class FP> class Problem {
 
-/**
- * @brief New problem initializer
- *
- * Defines a new problem, with the sizes of x, y and p defined. As for now
- * this is more than enough for our tests. If it works, we can use edit it later
- * @param xSize Size for the Problem#x vector
- * @param ySize Size for the Problem#y vector
- * @param zSize Size for the Problem#z vector
- * @return A new instance of Problem
- */
-Problem *Problem_init(size_t xSize, size_t ySize, size_t pSize);
-/**
- * @brief Problem destroyer
- *
- * Delete an instanced problem, freeing the problem vectors and then
- * freeing the struct. It also deletes the content of the struct if exists
- * @param self the problem to be destroyed
- * @return It returns nothing
- */
-void Problem_destroy(Problem *self);
+private:
+  string dl_file;
+  bool dl_open;
 
-/**
- * @brief private function for updating. Do NOT use it
- *
- * Calls internal function for updating all the values. This function is
- * called when a user perform a writing in the input file.
- * @param self the Problem to be updated
- * @param input the input string from the filesystem
- * @param v vector to update
- * @param size size of the vector. it must be consistent
- * @return Return zero on suceed
- */
-int Problem_write__private(Problem *self, const char *input, double *v,
-                           size_t size);
-/**
- * @brief updates values calling the internal function
- *
- * Calls internal function for updating all the values. This function is
- * called when a user perform a writing in the input file.
- * @param self the Problem to be updated
- * @param input the input string from the filesystem
- * @return Return zero on suceed
- */
-int Problem_write_x(Problem *self, const char *input);
-/**
- * @brief updates parameters and calls internal function
- *
- * Calls internal function for updating all the values. This function is
- * called when a user perform a writing in the parameters file.
- * @param self the Problem to be updated
- * @param input the input string from the filesystem
- * @return Return zero on suceed
- */
-int Problem_write_p(Problem *self, const char *input);
-/**
- * @brief return the current representation of the data to be written, with
- * offset
- *
- * Returns the current representation for the output, writing in a buffer that
- * gets in input, storing maximum a prescribed size and a defined offset. This
- * function actually mimic the interface of fuse, with the same arguments. As
- * for now,
- * at each call we make the conversion, but we can also store the conversion in
- * some form in
- * the problem structure and read only the required part
- * @param self the current Problem
- * @param buf the ouput vector of char representation
- * @param size the number of byte to write in buf
- * @param offset the offset for starting the writing
- * @param return byte written to buf
- * @return written size
- */
-int Problem_read(Problem *self, char *buf, size_t size, size_t offset);
-/**
- * @brief Create a string representation for the data
- *
- * This functions writes only the string representation into the
- * problem struct thus we already know the length of the evaluated string
- * @param self Problem current instance
- * @return buffer size that is saved in Problem#y_buf_size
- */
- int Problem_update(Problem *self);
+  size_t x_s, p_s;
+  string x_file, p_file, info_file;
+  vector<string> y_file;
 
- void Problem_debug(Problem * self);
-#endif /* _PROBLEM_H_ */
+  vector<Function> f;
+
+  void update();
+  void init();
+  void close();
+
+public:
+  vector<FP> x;
+  vector<FP> y;
+  vector<FP> p;
+
+  Problem(string dl)
+      : dl_file(dl), dl_open(false), x_file(""), p_file(""), info_file("") {
+    init();
+  };
+  virtual ~Problem() { close(); };
+
+  /* Fuse interface */
+  size_t write(FunctionInput type, const char *buf);
+  size_t read(int type, char *buf, size_t size, size_t offset);
+
+}; /* Problem */
+
+/* Exception Log function */
+#define ERROR_LOG(m) std::cout << "EXCEPTION RAISED: " << m <<endl;
+
+#endif /* __cplusplus */
+
+/*   ___   ___     _            __
+ *  / __|_|_ _|_ _| |_ ___ _ _ / _|__ _ __ ___
+ * | (_|___| || ' \  _/ -_) '_|  _/ _` / _/ -_)
+ *  \___| |___|_||_\__\___|_| |_| \__,_\__\___|
+ * * * * * * * * * * * * * * * *  * * * * * * * */
+
+#ifdef __cpluplus
+extern "C" {
+#endif /* __cplusplus */
+
+CProblem CProblem_new(const char *dl);
+void CProblem_destroy(CProblem self);
+size_t CProblem_x_write(CProblem self, const char *buf);
+size_t CProblem_p_write(CProblem self, const char *buf);
+size_t CProblem_read(CProblem self, int index, char *buf, size_t size, size_t offset);
+
+#ifdef __cpluplus
+}
+#endif /* __cplusplus */
+
+#endif /* _FUSE_PROBLEM_PROBLEM_HH_ */

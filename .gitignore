@@ -1,3 +1,4 @@
 *.o
+*.so
 fuse_problem
 .fuse_hidden*

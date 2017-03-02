@@ -88,7 +88,7 @@ int FuseProblem_write(const char *path, const char *buf, size_t size,
 int FuseProblem_truncate(const char *path, off_t size);
 
 int FuseProblem_flush(const char *path, struct fuse_file_info *fi);
-// int FuseProblem_access(const char* path, int mask);
+int FuseProblem_access(const char* path, int mask);
 int FuseProblem_setxattr(const char *path, const char *name, const char *value,
                          size_t size, int flags);
 int FuseProblem_getxattr(const char *path, const char *name, char *value,

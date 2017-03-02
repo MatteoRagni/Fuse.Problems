@@ -50,7 +50,8 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
   case Y_PATH:
     stbuf->st_mode = S_IFREG | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
-    stbuf->st_size = GET_PROBLEM()->y_buf_size;
+    // stbuf->st_size = GET_PROBLEM()->y_buf_size;
+    stbuf->st_size = strlen(GET_PROBLEM()->y_buf);
     break;
   case P_PATH:
     stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP;
