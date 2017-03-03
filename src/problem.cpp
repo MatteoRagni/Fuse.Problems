@@ -199,7 +199,7 @@ template <class FP> int Problem<FP>::pathid(const char *path) {
  * | (_|___| || ' \  _/ -_) '_|  _/ _` / _/ -_)
  *  \___| |___|_||_\__\___|_| |_| \__,_\__\___|
  * * * * * * * * * * * * * * * *  * * * * * * * */
-
+/*
 CProblem CProblem_new(const char *dl) {
   string s(dl);
   return reinterpret_cast<void *>(new Problem<PROBLEM_PRECISION>(s));
@@ -237,3 +237,4 @@ size_t CProblem_pfilesize(CProblem self) {
 size_t CProblem_ffilesize(CProblem self, int i) {
   return PROBLEM_CLASS(self)->ffilesize(i);
 }
+*/

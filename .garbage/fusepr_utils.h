@@ -25,49 +25,26 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-#include <math.h>
-#include "fuseproblem.h"
+static inline int problem_path(const char* path) {
+  return CProblem_pathid(GET_PROBLEM(), path);
+}
 
-std::string dl_path; /**< * This global will contain the library path */
+static inline size_t problem_fsize() {
+  return CProblem_fsize(GET_PROBLEM());
+}
 
-struct fuse_operations FuseProblem_operations = {
- .getattr = FuseProblem_getattr,
- .open = FuseProblem_open,
- .read = FuseProblem_read,
- .readdir = FuseProblem_readdir,
- .write = FuseProblem_write,
- .truncate = FuseProblem_truncate,
- .getxattr = FuseProblem_getxattr,
- .setxattr = FuseProblem_setxattr,
- .access = FuseProblem_access
-};
+static inline size_t problem_ffilesize() {
+  return CProblem_ffilesize(GET_PROBLEM());
+}
 
-/*   __  __      _
- * |  \/  |__ _(_)_ _
- * | |\/| / _` | | ' \
- * |_|  |_\__,_|_|_||_|
- */
-int main(int argc, char *argv[]) {
+static inline size_t problem_xfilesize() {
+  return CProblem_xfilesize(GET_PROBLEM());
+}
 
-  CProblem * pr = CProblem_new("test/libtest.so");
+static inline size_t problem_infofilesize() {
+  return CProblem_infofilesize(GET_PROBLEM());
+}
 
-  int ret = fuse_main(argc, argv, &FuseProblem_operations, NULL);
-
-  //char x_test[] = "2.0E00\n2.1E00";
-  //char p_test[] = "1.0E00\n1.0E02\n";
-
-  //Problem_write_x(pr, x_test);
-  //Problem_write_p(pr, p_test);
-
-  //printf("%s\n", pr->y_buf);
-  //printf("%d\n", pr->y_buf_size);
-
-  //printf("x = %lf, %lf\n", pr->x[0], pr->x[1]);
-  //printf("y = %lf, %lf\n", pr->y[0], pr->y[1]);
-  //printf("p = %lf, %lf\n", pr->p[0], pr->p[1]);
-
-  CProblem_destroy(pr);
-  //return ret;
-  return 0;
+static inline size_t problem_pfilesize(int i) {
+  return CProblem_pfilesize(GET_PROBLEM(), (size_t)((unsigned)i));
 }

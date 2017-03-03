@@ -50,7 +50,7 @@ using namespace std;
 #include <vector>
 
 typedef enum FunctionInput { xi = -2, pi } FunctionInput;
-typedef enum FunctionOutput { root = -4, info, xo, po } FunctionOutput;
+typedef enum FunctionOutput { root = -4, info, xo, po, fo } FunctionOutput;
 #define PROBLEM_E_NOFILE -100
 
 // typedef void (*Function)(void*,void*,void*);
@@ -77,7 +77,7 @@ public:
   vector<FP> y;
   vector<FP> p;
 
-  Problem(string dl) : dl_file(dl), x_file(""), p_file(""), info_file(""), x_s(0), p_s(0), f_s(0) {
+  Problem(const char* dl) : dl_file(dl), x_file(""), p_file(""), info_file(""), x_s(0), p_s(0), f_s(0) {
     init();
   };
   virtual ~Problem() { close(); };
@@ -88,17 +88,41 @@ public:
   int pathid(const char *path);
 
   /* Fuse Utils */
-  size_t xsize() { return x_s; }
-  size_t psize() { return p_s; }
-  size_t fsize() { return f_s; }
-  size_t xfilesize() { return x_file.size(); }
-  size_t pfilesize() { return p_file.size(); }
-  size_t ffilesize(size_t id) {
-    if (id >= 0 && id < y_file.size())
-      return y_file.size();
-    else
-      return 0;
+  size_t size(FunctionOutput t) {
+    switch(t) {
+      case FunctionOutput::xo:
+        return x_s;
+        break;
+      case FunctionOutput::po:
+        return p_s;
+        break;
+      case FunctionOutput::fo:
+        return f_s;
+        break;
+    }
+    return 0;
   }
+
+  size_t filesize(FunctionOutput t, int i = 0) {
+    switch(t) {
+      case FunctionOutput::xo:
+        return x_file.size();
+        break;
+      case FunctionOutput::po:
+        return p_file.size();
+        break;
+      case FunctionOutput::info:
+        return info_file.size();
+        break;
+      case FunctionOutput::fo:
+        if ((static_cast<size_t>(i) >= 0) && (static_cast<size_t>(i) < f_s)) {
+          return y_file.size();
+        }
+        break;
+    }
+    return 0;
+  }
+
 
 
 }; /* Problem */
@@ -117,7 +141,7 @@ public:
 #ifdef __cpluplus
 extern "C" {
 #endif /* __cplusplus */
-
+/*
 CProblem CProblem_new(const char *dl);
 void CProblem_destroy(CProblem self);
 size_t CProblem_x_write(CProblem self, const char *buf);
@@ -131,7 +155,7 @@ size_t CProblem_fsize(CProblem self);
 size_t CProblem_xfilesize(CProblem self);
 size_t CProblem_pfilesize(CProblem self);
 size_t CProblem_ffilesize(CProblem self, size_t i);
-
+*/
 #ifdef __cpluplus
 }
 #endif /* __cplusplus */

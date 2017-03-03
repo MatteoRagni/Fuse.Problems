@@ -27,21 +27,23 @@
 
 GCC     = gcc -g
 GXX     = g++ -std=c++11 -g
-SRC     = main.c src/fusepr.c src/problem.c
-OBJ     = fusepr.o problem.o utils.o
+SRC     = main.c src/fuseproblem.cpp src/problem.c
+OBJ     = fuse.o problem.o
 CFLAGS  = -I./include
 LIBFUSE = `pkg-config fuse --cflags --libs`
 LDFLAGS = -lm -ldl
 
-all: problem
-	$(GXX) $(CFLAGS) -c src/fusepr.c $(LIBFUSE) $(LDFLAGS) -o fusepr.o
-	$(GXX) $(CFLAGS) $(OBJ) main.c $(LIBFUSE) $(LDFLAGS) -o fuse_problem
+all: fuse problem
+	$(GCC) $(CFLAGS) $(OBJ) fuse.problem.c $(LIBFUSE) $(LDFLAGS) -lstdc++ -o fuse_problem
 
 problem-test: problem
 	$(GXX) $(CFLAGS) problem.o problem_test.c $(LDFLAGS) -o problem_test.o
 
 shared-test:
 	$(GXX) $(CFLAGS) test/libtest.cpp $(LDFLAGS) -fPIC -shared -o test/libtest.so
+
+fuse: problem
+	$(GXX) $(CFLAGS) -c src/fuseproblem.cpp $(LIBFUSE) $(LDFLAGS) -o fuse.o
 
 problem:
 	$(GXX) -c src/problem.cpp $(CFLAGS) $(LDFLAGS) -o problem.o

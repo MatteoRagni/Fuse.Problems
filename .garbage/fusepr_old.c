@@ -29,7 +29,7 @@
 
 int FuseProblem_getattr(const char *path, struct stat *stbuf) {
 
-  int path_id = problem_path();
+  int path_id = problem_path(path);
   if (path_id < FunctionOutput::root)
     return -ENOENT;
 
@@ -46,13 +46,11 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
     stbuf->st_nlink = 2;
     break;
   case FunctionOutput::xo:
-  case FunctionInput::xi:
     stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
     stbuf->st_size = problem_xfilesize();
     break;
   case FunctionOutput::po:
-  case FunctionInput::pi:
     stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
     // stbuf->st_size = GET_PROBLEM()->y_buf_size;
@@ -62,7 +60,7 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
     stbuf->st_mode = S_IFREG | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
     // stbuf->st_size = GET_PROBLEM()->y_buf_size;
-    stbuf->st_size = problem_pfilesize();
+    stbuf->st_size = problem_infofilesize();
     break;
   case P_PATH:
     stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP;
@@ -82,7 +80,7 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
 
 int FuseProblem_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                         off_t offset, struct fuse_file_info *fi) {
-  int path_id = problem_path();
+  int path_id = problem_path(path);
   if (path_id < FunctionOutput::root)
     return 0;
 
