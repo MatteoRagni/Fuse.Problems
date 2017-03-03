@@ -34,8 +34,6 @@ LIBFUSE = `pkg-config fuse --cflags --libs`
 LDFLAGS = -lm -ldl
 
 all: problem
-	$(GCC) $(CFLAGS) -c src/utils.c $(LDFLAGS) -o utils.o
-	$(GCC) $(CFLAGS) -c src/problem.c $(LDFLAGS) -o problem.o
 	$(GCC) $(CFLAGS) -c src/fusepr.c $(LDFLAGS) -o fusepr.o
 	$(GCC) $(CFLAGS) $(OBJ) main.c $(LDFLAGS) -o fuse_problem
 
@@ -44,7 +42,6 @@ problem-test: problem
 
 shared-test:
 	$(GXX) $(CFLAGS) test/libtest.cpp $(LDFLAGS) -fPIC -shared -o test/libtest.so
-	$(GXX) $(CFLAGS) test/main.cpp $(LDFLAGS) -ldl -o test/main.o
 
 problem:
 	$(GXX) -c src/problem.cpp $(CFLAGS) $(LDFLAGS) -o problem.o

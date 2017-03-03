@@ -37,31 +37,37 @@ typedef void *CProblem;
 
 using namespace std;
 
+#include "problemShared.hpp"
 #include <cmath>
 #include <cstddef>
-#include <iostream>
-#include <regex>
-#include <string>
-#include <vector>
-#include <sstream>
 #include <dlfcn.h>
+#include <iostream>
+#include <map>
+#include <regex>
+#include <sstream>
+#include <string>
 #include <unistd.h>
+#include <vector>
 
 typedef enum FunctionInput { xi, pi } FunctionInput;
-typedef enum FunctionOutput { info = -3, xo, po } FunctionOutput;
 
-typedef void (*Function)(void*,void*,void*);
+typedef enum FunctionOutput { root = -4, info, xo, po } FunctionOutput;
+#define PROBLEM_E_NOFILE -1000
+
+// typedef void (*Function)(void*,void*,void*);
 
 template <class FP> class Problem {
 
 private:
   string dl_file;
-  void* hdl;
-  size_t x_s, p_s;
+  void *hdl;
+  size_t x_s, p_s, f_s;
   string x_file, p_file, info_file;
   vector<string> y_file;
 
   vector<Function> f;
+
+  map<string, int> paths;
 
   void update();
   void init();
@@ -72,8 +78,7 @@ public:
   vector<FP> y;
   vector<FP> p;
 
-  Problem(string dl)
-      : dl_file(dl), x_file(""), p_file(""), info_file("") {
+  Problem(string dl) : dl_file(dl), x_file(""), p_file(""), info_file("") {
     init();
   };
   virtual ~Problem() { close(); };
@@ -81,11 +86,12 @@ public:
   /* Fuse interface */
   size_t write(FunctionInput type, const char *buf);
   size_t read(int type, char *buf, size_t size, size_t offset);
+  int pathid(const char *path);
 
 }; /* Problem */
 
 /* Exception Log function */
-#define ERROR_LOG(m) std::cout << "EXCEPTION RAISED: " << m <<endl;
+#define ERROR_LOG(m) std::cout << "EXCEPTION RAISED: " << m << endl;
 
 #endif /* __cplusplus */
 
@@ -103,7 +109,9 @@ CProblem CProblem_new(const char *dl);
 void CProblem_destroy(CProblem self);
 size_t CProblem_x_write(CProblem self, const char *buf);
 size_t CProblem_p_write(CProblem self, const char *buf);
-size_t CProblem_read(CProblem self, int index, char *buf, size_t size, size_t offset);
+size_t CProblem_read(CProblem self, int index, char *buf, size_t size,
+                     size_t offset);
+int CProblem_pathid(CProblem self, const char *path);
 
 #ifdef __cpluplus
 }
