@@ -49,10 +49,9 @@ using namespace std;
 #include <unistd.h>
 #include <vector>
 
-typedef enum FunctionInput { xi, pi } FunctionInput;
-
+typedef enum FunctionInput { xi = -2, pi } FunctionInput;
 typedef enum FunctionOutput { root = -4, info, xo, po } FunctionOutput;
-#define PROBLEM_E_NOFILE -1000
+#define PROBLEM_E_NOFILE -100
 
 // typedef void (*Function)(void*,void*,void*);
 
@@ -61,9 +60,9 @@ template <class FP> class Problem {
 private:
   string dl_file;
   void *hdl;
-  size_t x_s, p_s, f_s;
   string x_file, p_file, info_file;
   vector<string> y_file;
+  size_t x_s, p_s, f_s;
 
   vector<Function> f;
 
@@ -78,7 +77,7 @@ public:
   vector<FP> y;
   vector<FP> p;
 
-  Problem(string dl) : dl_file(dl), x_file(""), p_file(""), info_file("") {
+  Problem(string dl) : dl_file(dl), x_file(""), p_file(""), info_file(""), x_s(0), p_s(0), f_s(0) {
     init();
   };
   virtual ~Problem() { close(); };
@@ -87,6 +86,20 @@ public:
   size_t write(FunctionInput type, const char *buf);
   size_t read(int type, char *buf, size_t size, size_t offset);
   int pathid(const char *path);
+
+  /* Fuse Utils */
+  size_t xsize() { return x_s; }
+  size_t psize() { return p_s; }
+  size_t fsize() { return f_s; }
+  size_t xfilesize() { return x_file.size(); }
+  size_t pfilesize() { return p_file.size(); }
+  size_t ffilesize(size_t id) {
+    if (id >= 0 && id < y_file.size())
+      return y_file.size();
+    else
+      return 0;
+  }
+
 
 }; /* Problem */
 
@@ -112,6 +125,12 @@ size_t CProblem_p_write(CProblem self, const char *buf);
 size_t CProblem_read(CProblem self, int index, char *buf, size_t size,
                      size_t offset);
 int CProblem_pathid(CProblem self, const char *path);
+size_t CProblem_xsize(CProblem self);
+size_t CProblem_psize(CProblem self);
+size_t CProblem_fsize(CProblem self);
+size_t CProblem_xfilesize(CProblem self);
+size_t CProblem_pfilesize(CProblem self);
+size_t CProblem_ffilesize(CProblem self, size_t i);
 
 #ifdef __cpluplus
 }

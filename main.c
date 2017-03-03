@@ -41,14 +41,6 @@ struct fuse_operations FuseProblem_operations = {
  .access = FuseProblem_access
 };
 
-int rosenbrock_f(Problem *s) {
-  s->y[0] = pow(s->p[0] - s->x[0], 2.0) +
-            s->p[1] * pow((s->x[1] - pow(s->x[0], 2.0)), 2.0);
-  s->y[1] = pow(s->p[0] - s->x[1], 2.0) +
-            s->p[1] * pow((s->x[0] - pow(s->x[1], 2.0)), 2.0);
-  return 0;
-}
-
 /*   __  __      _
  * |  \/  |__ _(_)_ _
  * | |\/| / _` | | ' \
@@ -56,8 +48,7 @@ int rosenbrock_f(Problem *s) {
  */
 int main(int argc, char *argv[]) {
 
-  Problem * pr = Problem_init(2, 2, 2);
-  pr->f = rosenbrock_f;
+  CProblem * pr = CProblem_new("test/libtest.so");
 
   int ret = fuse_main(argc, argv, &FuseProblem_operations, (void*)pr);
 
@@ -74,7 +65,7 @@ int main(int argc, char *argv[]) {
   //printf("y = %lf, %lf\n", pr->y[0], pr->y[1]);
   //printf("p = %lf, %lf\n", pr->p[0], pr->p[1]);
 
-  Problem_destroy(pr);
+  CProblem_destroy(pr);
   //return ret;
   return 0;
 }

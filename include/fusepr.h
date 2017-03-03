@@ -28,14 +28,14 @@
 #ifndef _FUSEPR_H_
 #define _FUSEPR_H_
 
-#define FUSE_USE_VERSION 26
+#define FUSE_USE_VERSION 30
 #define _XOPEN_SOURCE 500
 
+#include <string>
 #include <errno.h>
 #include <fcntl.h>
 #include <fuse.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -47,35 +47,12 @@
 #include <stdio.h>
 #define LOG(m) printf("====> FUSE_PROBLEM :: %s\n", m);
 
-#define GET_PROBLEM() ((Problem *)(fuse_get_context()->private_data))
+#define GET_PROBLEM() ((CProblem)(fuse_get_context()->private_data))
+#include "fusepr_utils.h"
 
-// Fuse configuration
-static const char *FuseProblem_x_path = "/x";
-static const char *FuseProblem_y_path = "/y";
-static const char *FuseProblem_p_path = "/p";
-
-typedef enum FuseProblemPath {
-  ROOT_PATH,
-  X_PATH,
-  Y_PATH,
-  P_PATH
-} FuseProblemPath;
-
-static inline FuseProblemPath checkPath(const char *path) {
-  if (strcmp(path, "/") == 0) {
-    return ROOT_PATH;
-  }
-  if (strcmp(path, "/p") == 0) {
-    return P_PATH;
-  }
-  if (strcmp(path, "/x") == 0) {
-    return X_PATH;
-  }
-  if (strcmp(path, "/y") == 0) {
-    return Y_PATH;
-  }
-  return -1;
-}
+#ifdef __cpluplus
+extern "C" {
+#endif /* __cplusplus */
 
 int FuseProblem_getattr(const char *path, struct stat *stbuf);
 int FuseProblem_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
@@ -94,4 +71,9 @@ int FuseProblem_setxattr(const char *path, const char *name, const char *value,
 int FuseProblem_getxattr(const char *path, const char *name, char *value,
                          size_t size);
 int FuseProblem_listxattr(const char *path, const char *list, size_t size);
+
+#ifdef __cpluplus
+}
+#endif /* __cplusplus */
+
 #endif /* _FUSEPR_H_ */

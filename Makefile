@@ -34,8 +34,8 @@ LIBFUSE = `pkg-config fuse --cflags --libs`
 LDFLAGS = -lm -ldl
 
 all: problem
-	$(GCC) $(CFLAGS) -c src/fusepr.c $(LDFLAGS) -o fusepr.o
-	$(GCC) $(CFLAGS) $(OBJ) main.c $(LDFLAGS) -o fuse_problem
+	$(GXX) $(CFLAGS) -c src/fusepr.c $(LIBFUSE) $(LDFLAGS) -o fusepr.o
+	$(GXX) $(CFLAGS) $(OBJ) main.c $(LIBFUSE) $(LDFLAGS) -o fuse_problem
 
 problem-test: problem
 	$(GXX) $(CFLAGS) problem.o problem_test.c $(LDFLAGS) -o problem_test.o

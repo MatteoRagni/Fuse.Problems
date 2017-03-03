@@ -28,7 +28,10 @@
 #include "fusepr.h"
 
 int FuseProblem_getattr(const char *path, struct stat *stbuf) {
-  Problem_debug(GET_PROBLEM());
+
+  int path_id = problem_path();
+  if (path_id < FunctionOutput::root)
+    return -ENOENT;
 
   memset(stbuf, 0, sizeof(struct stat));
 
@@ -37,21 +40,29 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
   stbuf->st_gid = getgid();
   stbuf->st_atime = stbuf->st_mtime = time(NULL);
 
-  switch (checkPath(path)) {
-  case ROOT_PATH:
+  switch(path_id) {
+  case FunctionOutput::root:
     stbuf->st_mode = S_IFDIR | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 2;
     break;
-  case X_PATH:
-    stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP;
+  case FunctionOutput::xo:
+  case FunctionInput::xi:
+    stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
-    stbuf->st_size = 0;
+    stbuf->st_size = problem_xfilesize();
     break;
-  case Y_PATH:
+  case FunctionOutput::po:
+  case FunctionInput::pi:
+    stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP | S_IRUSR | S_IRGRP;
+    stbuf->st_nlink = 1;
+    // stbuf->st_size = GET_PROBLEM()->y_buf_size;
+    stbuf->st_size = problem_pfilesize();
+    break;
+  case FunctionInput::info:
     stbuf->st_mode = S_IFREG | S_IRUSR | S_IRGRP;
     stbuf->st_nlink = 1;
     // stbuf->st_size = GET_PROBLEM()->y_buf_size;
-    stbuf->st_size = strlen(GET_PROBLEM()->y_buf);
+    stbuf->st_size = problem_pfilesize();
     break;
   case P_PATH:
     stbuf->st_mode = S_IFREG | S_IWUSR | S_IWGRP;
@@ -59,9 +70,11 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
     stbuf->st_size = 0;
     break;
   default:
-    stbuf->st_mode = S_IFDIR | S_IRUSR | S_IRGRP;
-    stbuf->st_nlink = 2;
-    stbuf->st_size = 0;
+    if (path_id >= 0 && path_id < problem_fsize()) {
+      stbuf->st_mode = S_IFREG | S_IRUSR | S_IRGRP;
+      stbuf->st_nlink = 1;
+      stbuf->st_size = problem_ffilesize(path_id);
+    }
     break;
   }
   return 0;
@@ -69,44 +82,59 @@ int FuseProblem_getattr(const char *path, struct stat *stbuf) {
 
 int FuseProblem_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                         off_t offset, struct fuse_file_info *fi) {
+  int path_id = problem_path();
+  if (path_id < FunctionOutput::root)
+    return 0;
+
   (void)offset;
   (void)fi;
-
-  if (checkPath(path) < 0)
-    return -ENOENT;
 
   filler(buf, ".", NULL, 0);
   filler(buf, "..", NULL, 0);
 
-  switch (checkPath(path)) {
-  case ROOT_PATH:
+  switch (path_id) {
+  case FunctionOutput::root:
     filler(buf, "x", NULL, 0);
     filler(buf, "y", NULL, 0);
-    filler(buf, "p", NULL, 0);
+    for (int i = 0; i < problem_fsize(), i++) {
+      string s("/y");
+      filler(buf, (s + to_string(i)).c_str(), NULL, 0);
+    }
     break;
-  case P_PATH:
-    filler(buf, "p", NULL, 0);
+  case FunctionOutput::info:
+    filler(buf, "info", NULL, 0);
     break;
-  case Y_PATH:
-    filler(buf, "y", NULL, 0);
-    break;
-  case X_PATH:
+  case FunctionOutput::xo:
     filler(buf, "x", NULL, 0);
+    break;
+  case FunctionOutput::po:
+    filler(buf, "x", NULL, 0);
+    break;
+  default:
+    if (path_id >= 0 && path_id < problem_fsize()) {
+      string s("/y");
+      filler(buf, (s + to_string(path_id)).c_str(), NULL, 0);
+    }
     break;
   }
   return 0;
 }
 
 int FuseProblem_open(const char *path, struct fuse_file_info *fi) {
+  return 0;
+
+  /*
   fi->direct_io = 1;
 
   if (checkPath(path) >= 0)
     return 0;
   return -ENOENT;
+  */s
 }
 
 int FuseProblem_write(const char *path, const char *buf, size_t size,
                       off_t offset, struct fuse_file_info *fi) {
+  /*
   if (strcmp(path, FuseProblem_p_path) == 0) {
     Problem_write_p(GET_PROBLEM(), buf);
     return size;
@@ -115,23 +143,26 @@ int FuseProblem_write(const char *path, const char *buf, size_t size,
     Problem_write_x(GET_PROBLEM(), buf);
     return size;
   }
-
+  */
   return size;
 }
 
 int FuseProblem_read(const char *path, char *buf, size_t size, off_t offset,
                      struct fuse_file_info *fi) {
+  /*
   if (strcmp(path, FuseProblem_y_path) == 0) {
     return Problem_read(GET_PROBLEM(), buf, size, offset);
   }
+  */
   return 0;
 }
 
 int FuseProblem_truncate(const char *path, off_t size) {
+  /*
   if (strcmp(path, FuseProblem_x_path) == 0 ||
       strcmp(path, FuseProblem_p_path) == 0)
     return 0;
-
+  */
   return -ENOENT;
 }
 

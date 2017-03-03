@@ -61,14 +61,16 @@ template <class FP> void Problem<FP>::init() {
   x.resize(x_s, 99e99);
   p.resize(p_s, 50e50);
 
-  for (size_t i = 0; i < f_s; i++)
+  for (size_t i = 0; i < f_s; i++) {
     f.push_back(fncPtr[i]);
-  paths.insert(pair("/y" + to_string(i), i));
+    paths.insert(pair<string, int>("/y" + to_string(i), i));
+  }
 
-  paths.insert(pair<string, int>("/x", static_cast<int> FunctionOutput::xo));
-  paths.insert(pair<string, int>("/p", static_cast<int> FunctionOutput::po));
-  paths.insert(pair<string, int>("/info", static_cast<int> FunctionOutput::po));
-  paths.insert(pair<string, int>("/", static_cast<int> FunctionOutput::root));
+  paths.insert(pair<string, int>("/x", static_cast<int>(FunctionOutput::xo)));
+  paths.insert(pair<string, int>("/p", static_cast<int>(FunctionOutput::po)));
+  paths.insert(
+      pair<string, int>("/info", static_cast<int>(FunctionOutput::po)));
+  paths.insert(pair<string, int>("/", static_cast<int>(FunctionOutput::root)));
 
   // Info file generation
   info_file = "---\nlib: " + dl_file + "\nxsize: " + to_string(x_s) + "\n" +
@@ -181,7 +183,7 @@ size_t Problem<FP>::read(int type, char *buf, size_t size, size_t offset) {
   return size;
 }
 
-template <class FP> int pathid(const char *path) {
+template <class FP> int Problem<FP>::pathid(const char *path) {
   string p(path);
 
   if (paths.find(p) == paths.end())
@@ -219,5 +221,19 @@ size_t CProblem_read(CProblem self, int index, char *buf, size_t size,
 }
 
 int CProblem_pathid(CProblem self, const char *path) {
-  rturn PROBLEM_CLASS(self)->read(path);
+  return PROBLEM_CLASS(self)->pathid(path);
+}
+
+size_t CProblem_xsize(CProblem self) { return PROBLEM_CLASS(self)->xsize(); }
+size_t CProblem_psize(CProblem self) { return PROBLEM_CLASS(self)->psize(); }
+size_t CProblem_fsize(CProblem self) { return PROBLEM_CLASS(self)->fsize(); }
+
+size_t CProblem_xfilesize(CProblem self) {
+  return PROBLEM_CLASS(self)->xfilesize();
+}
+size_t CProblem_pfilesize(CProblem self) {
+  return PROBLEM_CLASS(self)->pfilesize();
+}
+size_t CProblem_ffilesize(CProblem self, int i) {
+  return PROBLEM_CLASS(self)->ffilesize(i);
 }
