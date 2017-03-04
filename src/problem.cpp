@@ -108,9 +108,8 @@ template <class FP> void Problem<FP>::update() {
     }
 
     for (auto j = y.begin(); j != y.end(); ++j) {
-      s += (to_string((*j)) + "\n");
+      s += to_string(*j) + "\n";
     }
-    // cout << s << endl;
     y_file.push_back(s);
   }
 }
@@ -180,7 +179,7 @@ int Problem<FP>::read(int type, char *buf, size_t size, size_t offset) {
       break;
   }
 
-  size_t out_size = out->size() + 1;
+  size_t out_size = out->size();
   if (offset > out_size)
     return 0;
 
@@ -374,6 +373,7 @@ int fpr_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
 //     |_|
 int fpr_open(const char *path, struct fuse_file_info *fi) {
   (void) fi;
+  fi->direct_io = 1;
   Problem<PROBLEM_PRECISION> *pr = get_problem();
   int path_id = pr->pathid(path);
 
@@ -395,9 +395,7 @@ int fpr_read(const char *path, char *buf, size_t size, off_t offset, struct fuse
   if (path_id < FunctionOutput::root)
     return 0;
 
-  int ret = pr->read(path_id, buf, size, offset);
-  cout << "===> TEST: " << ret << endl << buf << endl;
-  return ret;
+  return pr->read(path_id, buf, size, offset);
 }
 
 //             _ _
