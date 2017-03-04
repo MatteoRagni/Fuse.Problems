@@ -35,11 +35,6 @@ int main(int argc, char *argv[]) {
     .read      = fpr_read,
     .write     = fpr_write,
     .truncate  = fpr_truncate,
-    //.flush     = fpr_flush,
-    //.access    = fpr_access,
-    //.setxattr  = fpr_setxattr,
-    //.getxattr  = fpr_getxattr,
-    //.listxattr = fpr_listxattr
   };
 
   fpr_init(argv[argc - 1]);

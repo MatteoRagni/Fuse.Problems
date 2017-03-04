@@ -388,7 +388,6 @@ int fpr_open(const char *path, struct fuse_file_info *fi) {
 // |_| \___\__,_\__,_|
 int fpr_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
   (void) fi;
-  //fi->direct_io = 1;
   Problem<PROBLEM_PRECISION> *pr = get_problem();
   int path_id = pr->pathid(path);
 
@@ -414,37 +413,15 @@ int fpr_write(const char *path, const char *buf, size_t size,
   return 0;
 }
 
-//   __ _         _
-//  / _| |_  _ __| |_
-// |  _| | || (_-< ' \
-// |_| |_|\_,_/__/_||_|
-int fpr_flush(const char *path, struct fuse_file_info *fi) { return 0; }
-
+//  _                         _
+// | |_ _ _ _  _ _ _  __ __ _| |_ ___
+// |  _| '_| || | ' \/ _/ _` |  _/ -_)
+//  \__|_|  \_,_|_||_\__\__,_|\__\___|
 int fpr_truncate(const char *path, off_t size) {
   Problem<PROBLEM_PRECISION> *pr = get_problem();
   int path_id = pr->pathid(path);
   if (path_id < FunctionOutput::root)
     return -ENOENT;
 
-  return 0;
-}
-
-int fpr_access(const char *path, int mask) { return 0; }
-
-
-int fpr_setxattr(const char *path, const char *name, const char *value,
-                         size_t size, int flags) {
-  //return -ENOTSUP;
-  return 0;
-}
-
-int fpr_listxattr(const char *path, char *list, size_t size) {
-  //return -ENOTSUP;
-  return 0;
-}
-
-int fpr_getxattr(const char *path, const char *name, char *value,
-                         size_t size) {
-  //return -ENOTSUP;
   return 0;
 }

@@ -108,23 +108,18 @@ int fpr_open(const char *path, struct fuse_file_info *fi);
  */
 int fpr_read(const char *path, char *buf, size_t size, off_t offset,
                     struct fuse_file_info *fi);
-
+/**
+ * @brief
+ *
+ */
 int fpr_write(const char *path, const char *buf, size_t size,
                       off_t offset, struct fuse_file_info *fi);
-
+/**
+ * @brief
+ *
+ */
 int fpr_truncate(const char *path, off_t size);
 
-int fpr_flush(const char *path, struct fuse_file_info *fi);
-
-int fpr_access(const char *path, int mask);
-
-int fpr_setxattr(const char *path, const char *name, const char *value,
-                         size_t size, int flags);
-
-int fpr_listxattr(const char *path, char *list, size_t size);
-
-int fpr_getxattr(const char *path, const char *name, char *value,
-                         size_t size);
 
 #ifdef __cplusplus
 }
