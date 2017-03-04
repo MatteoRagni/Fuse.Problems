@@ -28,8 +28,11 @@
 #ifndef _FUSE_PROBLEM_FUSE_HH_
 #define _FUSE_PROBLEM_FUSE_HH_
 
+#define _FILE_OFFSET_BITS 64
 #define FUSE_USE_VERSION 30
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
+#endif
 
 #include <errno.h>
 #include <fcntl.h>
@@ -40,59 +43,48 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
-#include "problem.h"
+
+void * problem;  /**< external global variable that contains the problem lib path */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * This definition queries the fuse context to get the private data.
- * Once is obtained reinterpret it to a Problem pointer of the initially
- * created instance
- */
-#define get_problem() reinterpret_cast< Problem<PROBLEM_PRECISION>* >(fuse_get_context()->private_data)
-
-extern char * dl_path; /**< external global variable that contains the shared lib path */
-
-
 /**
  * @brief initializer for the fuse.problem filesystem
  *
- * This function creates a new pointer for the fuse problem that will be saved in the
- * context of the fuse library
- * @param conn struct with some informations on the filesystem configuration (unused)
- * @return a void pointer that is a reinterpret cast from Problem class
+ * This function creates a new pointer for the fuse problem that will be used
+ * throughout the library
+ * @param path path of the shared library that contains the shared object
  */
-void * fpr_init(struct fuse_conn_info *conn);
+void fpr_init(const char * path);
 /**
  * @brief destroyer for the fuse.problem filesystem.
  *
- * The function takes as input the content of the context, that is as void pointer.
- * With a reinterpret cast the class instance is reconstructed and deleted.
- * @param private_data the pointer void to our instance
- * @return nothing
+ * Destroys the fuse Problem class
  */
-void fpr_destroy(void * private_data);
+void fpr_destroy();
 /**
  * @brief getattr callback for fuse.problem
  *
  * The getattr callback should fill a stat struct that contains the
- * times for the different files and access attributes.
+ * times for the different files and access attributes. This is a
+ * callback.
  * @param path the path of the inode that is stat
  * @param stbuf the struct stat that must be filled
  * @return a 0 int when succeed, and a -ENOENT on error (path unknown)
  */
 int fpr_getattr(const char *path, struct stat *stbuf);
 /**
-* @brief
+* @brief fill the stat struct for the filesystem
 *
-* @param path
-* @param buf
+* Fills recursively the stat struct that contains the access informations
+* and the contained file system. This is a callback.
+* @param path the current file path
+* @param buf an internal buffer required by the callback
 * @param filler
 * @param offset
 * @param fi
-* @return
+* @return a 0 on success, -ENOENT il not found
  */
 int fpr_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                          off_t offset, struct fuse_file_info *fi);
@@ -116,6 +108,23 @@ int fpr_open(const char *path, struct fuse_file_info *fi);
  */
 int fpr_read(const char *path, char *buf, size_t size, off_t offset,
                     struct fuse_file_info *fi);
+
+int fpr_write(const char *path, const char *buf, size_t size,
+                      off_t offset, struct fuse_file_info *fi);
+
+int fpr_truncate(const char *path, off_t size);
+
+int fpr_flush(const char *path, struct fuse_file_info *fi);
+
+int fpr_access(const char *path, int mask);
+
+int fpr_setxattr(const char *path, const char *name, const char *value,
+                         size_t size, int flags);
+
+int fpr_listxattr(const char *path, char *list, size_t size);
+
+int fpr_getxattr(const char *path, const char *name, char *value,
+                         size_t size);
 
 #ifdef __cplusplus
 }

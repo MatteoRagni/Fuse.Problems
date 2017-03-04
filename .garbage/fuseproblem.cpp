@@ -26,12 +26,24 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "fuseproblem.h"
+#include "problem.h"
+
+/**
+ * This definition queries the fuse context to get the private data.
+ * Once is obtained reinterpret it to a Problem pointer of the initially
+ * created instance
+ */
+#define get_problem() reinterpret_cast< Problem<PROBLEM_PRECISION>* >(fuse_get_context()->private_data)
+
+void fpr_setpath(const char * path) { dl_path = (char *)path; }
 
 //  _      _ _
 // (_)_ _ (_) |_
 // | | ' \| |  _|
 // |_|_||_|_|\__|
 void * fpr_init(struct fuse_conn_info *conn) {
+  if (!(dl_path))
+    exit(1);
   Problem<PROBLEM_PRECISION> *pr = new Problem<PROBLEM_PRECISION>(dl_path);
   return reinterpret_cast<void*>(pr);
 }

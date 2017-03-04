@@ -25,28 +25,27 @@
 # *                                                                           *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-GCC     = gcc -g
-GXX     = g++ -std=c++11 -g
-SRC     = main.c src/fuseproblem.cpp src/problem.c
-OBJ     = fuse.o problem.o
+GCC     = gcc -g -Wall -Wno-comment
+GXX     = g++ -std=c++11 -g -Wall -Wno-comment
 CFLAGS  = -I./include
-LIBFUSE = `pkg-config fuse --cflags --libs`
-LDFLAGS = -lm -ldl
+CFUSE   = `pkg-config --cflags fuse`
+LFUSE   = `pkg-config fuse --libs`
+LDFLAGS = $(LFUSE) -lm -ldl
 
-all: fuse problem
-	$(GCC) $(CFLAGS) $(OBJ) fuse.problem.c $(LIBFUSE) $(LDFLAGS) -lstdc++ -o fuse_problem
+all: main problem shared
+	$(GXX) $(LDFLAGS) -o fuse_problem problem.o fuse.problem.o
 
-problem-test: problem
-	$(GXX) $(CFLAGS) problem.o problem_test.c $(LDFLAGS) -o problem_test.o
-
-shared-test:
-	$(GXX) $(CFLAGS) test/libtest.cpp $(LDFLAGS) -fPIC -shared -o test/libtest.so
+main: problem
+	$(GCC) -c fuse.problem.c $(CFLAGS) $(CFUSE) -o fuse.problem.o
 
 fuse: problem
-	$(GXX) $(CFLAGS) -c src/fuseproblem.cpp $(LIBFUSE) $(LDFLAGS) -o fuse.o
+	$(GXX) -c src/fuseproblem.cpp $(CFLAGS) -o fuse.o
 
 problem:
-	$(GXX) -c src/problem.cpp $(CFLAGS) $(LDFLAGS) -o problem.o
+	$(GXX) -c src/problem.cpp $(CFLAGS) -o problem.o
+
+shared:
+	$(GXX) $(CFLAGS) test/libtest.cpp $(LDFLAGS) -fPIC -shared -o test/libtest.so
 
 clean:
 	rm -f fuse_problem *.o *.so test/*.so
