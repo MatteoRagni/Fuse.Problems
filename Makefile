@@ -32,20 +32,17 @@ CFUSE   = `pkg-config --cflags fuse`
 LFUSE   = `pkg-config fuse --libs`
 LDFLAGS = $(LFUSE) -lm -ldl
 
-all: main problem shared
-	$(GXX) $(LDFLAGS) -o fuse_problem problem.o fuse.problem.o
+all: fuse.problem
+	$(GXX) $(LDFLAGS) -o fuse.problem problem.o fuse.problem.o
 
-main: problem
-	$(GCC) -c fuse.problem.c $(CFLAGS) $(CFUSE) -o fuse.problem.o
-
-fuse: problem
-	$(GXX) -c src/fuseproblem.cpp $(CFLAGS) -o fuse.o
+fuse.problem: problem
+	$(GCC) -c main.c $(CFLAGS) $(CFUSE) -o fuse.problem.o
 
 problem:
 	$(GXX) -c src/problem.cpp $(CFLAGS) -o problem.o
 
-shared:
-	$(GXX) $(CFLAGS) test/libtest.cpp $(LDFLAGS) -fPIC -shared -o test/libtest.so
+rosenbrock:
+	$(GXX) $(CFLAGS) shared/librosenbrock.cpp $(LDFLAGS) -fPIC -shared -o shared/librosenbrock.so
 
 clean:
-	rm -f fuse_problem *.o *.so test/*.so
+	rm -f fuse.problem *.o *.so test/*.so

@@ -27,7 +27,7 @@
 
 #include "problem.h"
 #include "problemShared.hpp"
-#include "fuseproblem.h"
+#include "problemFuse.h"
 
 /* Exception Log function */
 #define ERROR_LOG(m) std::cout << "EXCEPTION RAISED: " << m << endl;
