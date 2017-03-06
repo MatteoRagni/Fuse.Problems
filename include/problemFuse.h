@@ -25,6 +25,13 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**
+ * @file problemFuse.h
+ * @brief The file contains all the fuse callbacks implemented
+ *
+ * The file contains all the fuse callbacks implemented
+ */
+
 #ifndef _FUSE_PROBLEM_FUSE_HH_
 #define _FUSE_PROBLEM_FUSE_HH_
 

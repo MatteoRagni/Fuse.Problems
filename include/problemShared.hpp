@@ -25,6 +25,16 @@
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**
+ * @file problemShared.hpp
+ * @brief This is the only header that is necessary to write shared object
+ *
+ * This is the only header that user should include to work with problem.fuse and
+ * write problem shared object.
+ *
+ * Please look at librosenbrock.cpp to see how to use it
+ */
+
 #ifndef _FUSE_PROBLEM_DEFINE_HPP_
 #define _FUSE_PROBLEM_DEFINE_HPP_
 
