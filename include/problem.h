@@ -24,6 +24,13 @@
 /* OTHER DEALINGS IN THE SOFTWARE.                                           */
 /*                                                                           */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/**
+ * @file problem.h
+ * @brief The Problem container class
+ *
+ * This file describes the class that contains the problem
+ */
 #ifndef _FUSE_PROBLEM_PROBLEM_HH_
 #define _FUSE_PROBLEM_PROBLEM_HH_
 
