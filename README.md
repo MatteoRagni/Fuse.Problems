@@ -75,7 +75,7 @@ mkdir /tmp/mount
 ./fuse.problem -s /tmp/mount lib$(shared_source).so
 ```
 
-Looking inside  `/tmp/mount`, user will find the discussed files.
+The `-s` option is for single-thread filesystem. This will force filesystem operations as blocking. Looking inside  `/tmp/mount`, user will find the discussed files.
 
 To unmount the filesystem:
 ```
