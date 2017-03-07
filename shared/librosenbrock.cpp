@@ -42,8 +42,8 @@
  * $$
  * \\nabla f = \\left[
  * \\begin{array}{c}
- * 4 a x^3 - 4 b x y - 2 a + 2 x \\\\
- * 3 b (y - x^2)
+ * 2 x - 2 a - 4 b x (-x^2 + y) \\\\
+ * 2 b (y - x^2)
  * \\end{array}
  * \\right]
  * $$
@@ -53,8 +53,10 @@
  * $$
  * \\nabla ^2 f = \\left[
  * \\begin{array}{cc}
- * 2 + (12 x - 4 y) b & -4 b x \\\\
- * -4 b x & 2 b
+ * 2 + 8 b x^2 - 4 b (-x^2 + y) - 4 b x &
+ * -4 b x \\\\
+ * -4 b x &
+ * 2 b
  * \\end{array}
  * \\right]
  * $$
@@ -97,7 +99,7 @@ FUNCTION_DEFINE(f_rosenbrock, {
 FUNCTION_DEFINE(df_rosenbrock, {
   Y().clear();
   Y().push_back(
-    4.0 * P()[1] * pow(X()[0], 3.0) - 4.0 * P()[1] * X()[0] * X()[1] - 2.0 * P()[0] + 2.0 * X()[0]
+    2 * X()[0] - 2 * P()[0] - 4 * P()[1] * X()[0] * (-pow(X()[0], 2.0) + X()[1])
   );
   Y().push_back(
     2.0 * P()[1] * (X()[1] - pow(X()[0], 2.0))
@@ -110,7 +112,7 @@ FUNCTION_DEFINE(ddf_rosenbrock, {
   PROBLEM_PRECISION ddf01 = -4.0 * P()[1] * X()[0];
 
   Y().push_back(
-    2.0 + (12.0 * pow(X()[0], 2.0) - 4.0 * X()[1]) * P()[1]
+    2.0 + 8.0 * P()[1] * pow(X()[0], 2) - 4 * P()[1] * (X()[1] - pow(X()[0], 2))
   );
   Y().push_back(ddf01);
   Y().push_back(ddf01);

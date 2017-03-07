@@ -36,7 +36,7 @@ all: fuse.problem
 	$(GXX) $(LDFLAGS) -o fuse.problem problem.o fuse.problem.o
 
 fuse.problem: problem
-	$(GCC) -c main.c $(CFLAGS) $(CFUSE) -o fuse.problem.o
+	$(GCC) -c src/main.c $(CFLAGS) $(CFUSE) -o fuse.problem.o
 
 problem:
 	$(GXX) -c src/problem.cpp $(CFLAGS) -o problem.o

@@ -85,5 +85,39 @@ File system **must** always be unmounted, or it will continue to run in backgrou
 
 ## Example
 
-Let's run `librosenbrock` to test usage, with a ruby script that reads and writes files.
-TO BE FINISHED
+Let's run `librosenbrock` to test usage, with a ruby script that reads and writes files. The script implements a Newton method on the Rosenbrock function.
+
+The necessary file system is loaded as:
+```sh
+make all
+make rosenbrock
+
+./fuse.problem -s /tmp/mount shared/librosenbrock.so
+```
+
+Then `rosenbrock.rb` can be run as test problem. The core elements to interface file system with Ruby language are the three functions:
+```ruby
+def write(x)
+  File.open($x, "w") { |xf| xf.puts x.map(&:to_s).join("\n") }
+end
+```
+for writing a new value (it also triggers a re-evaluation),
+```ruby
+def write_p(p)
+  File.open($p, "w") { |pf|  pf.puts p.map(&:to_s).join("\n") }
+end
+```
+for writing a parameter, and
+```ruby
+def read()
+  return [
+    File.open($df, "r").read.chomp.split("\n").map(&:to_f),
+    File.open($ddf, "r").read.chomp.split("\n").map(&:to_f)
+  ]
+end
+
+# [...]
+
+File.open($f, "r").read.chomp
+```
+for reading gradient, hessian (function `read`) and reading the function value (the last line).

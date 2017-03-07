@@ -1,4 +1,4 @@
 *.o
 *.so
-fuse_problem
+fuse.problem
 .fuse_hidden*

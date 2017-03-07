@@ -120,7 +120,7 @@ private:
   map<string, int> paths; /**< path to internal representation (enums) mapping */
 
   size_t x_s; /**< declared dimension for input x */
-  size_t p_s  /**< declared dimension for parameter p */
+  size_t p_s; /**< declared dimension for parameter p */
   size_t f_s; /**< number of function declared in shared object */
 
   vector<Function> f; /**< vector of function pointer */
